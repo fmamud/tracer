@@ -13,7 +13,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
@@ -85,18 +84,3 @@ public class ProcessingFiles implements Step {
         return node.calls;
     }
 }
-
-//try (BufferedWriter bw = new BufferedWriter(new FileWriter(new File("/Users/felipe/Downloads/SimScale_Backend_Case_2/my-log.txt"), true), BUFFER_SIZE)) {
-//        Files.list(Paths.get("/tmp/sim"))
-//        .map(Main::generateTrace)
-//        .forEach(tree -> {
-//        try {
-//        bw.write(tree.toString());
-//        bw.write('\n');
-//        } catch (IOException e) {
-//        e.printStackTrace();
-//        }
-//        });
-//        } catch (IOException e) {
-//        e.printStackTrace();
-//        }

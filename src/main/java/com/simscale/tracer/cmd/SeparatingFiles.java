@@ -37,19 +37,3 @@ public class SeparatingFiles implements Step {
         }
     }
 }
-
-//
-// Path path = Paths.get("/Users/felipe/Downloads/SimScale_Backend_Case_2/medium-log.txt");
-
-//        try (Stream<String> lines = Files.lines(path)) {
-//            lines.parallel().forEach(line -> {
-//                LogLine logLine = new LogLine(line.split("\\s+"));
-//                File file = new File("/tmp/sim", String.format("%s.txt", logLine.trace));
-//                file.deleteOnExit();
-//                try (BufferedWriter bw = new BufferedWriter(new FileWriter(file, true), BUFFER_SIZE)) {
-//                    bw.write(line);
-//                    bw.write('\n');
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//            });
