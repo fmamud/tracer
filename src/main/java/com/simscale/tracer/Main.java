@@ -5,18 +5,18 @@ import com.simscale.tracer.ast.LogLine;
 import com.simscale.tracer.ast.Node;
 import com.simscale.tracer.parser.ArgumentsParser;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
@@ -24,53 +24,42 @@ public class Main {
     public static void main(String[] args) throws Exception {
         ArgumentsParser opts = ArgumentsParser.parse(args);
 
-        Files.list(Paths.get("/tmp/sim"))
-                .forEach(p -> {
-                    try {
-                        Files.delete(p);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                });
+        long startTime = System.nanoTime();
 
-        long start = System.currentTimeMillis();
+        Path path = Paths.get("/Users/felipe/Downloads/SimScale_Backend_Case_2/medium-log.txt");
 
-        ExecutorService pool = Executors.newFixedThreadPool(10);
-
-        try (Scanner sc = new Scanner(opts.getInput())) {
-            while (sc.hasNextLine()) {
-                String line = sc.nextLine();
+        try (Stream<String> lines = Files.lines(path)) {
+            lines.parallel().forEach(line -> {
                 LogLine logLine = new LogLine(line.split("\\s+"));
-                Path path = Paths.get("/tmp/sim", String.format("%s.txt", logLine.trace));
-
-                try {
-                    if (Files.notExists(path)) Files.createFile(path);
-                    Files.write(path, line.getBytes(), StandardOpenOption.APPEND);
-                    Files.write(path, new byte[]{'\n'}, StandardOpenOption.APPEND);
+                File file = new File("/tmp/sim", String.format("%s.txt", logLine.trace));
+                file.deleteOnExit();
+                try (BufferedWriter bw = new BufferedWriter(new FileWriter(file, true), 65536)) {
+                    bw.write(line);
+                    bw.write('\n');
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-            }
+            });
         }
 
-        System.out.println("Write files ok (" + (System.currentTimeMillis() - start) + "ms)");
+        long elapsedTimeInMillis = TimeUnit.MILLISECONDS.convert((System.nanoTime() - startTime), TimeUnit.NANOSECONDS);
+        System.out.println("Write files ok: " + elapsedTimeInMillis + " ms");
 
-        try (OutputStream sc = opts.getOutput()) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(new File("/Users/felipe/Downloads/SimScale_Backend_Case_2/my-log.txt"), true), 65536)) {
             Files.list(Paths.get("/tmp/sim"))
                     .map(Main::generateTrace)
                     .forEach(tree -> {
                         try {
-                            sc.write(tree.toString().getBytes());
-                            sc.write('\n');
+                            bw.write(tree.toString());
+                            bw.write('\n');
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
                     });
         }
 
-        pool.shutdown();
-
-        System.out.println("time:" + (System.currentTimeMillis() - start) + "ms");
+        elapsedTimeInMillis = TimeUnit.MILLISECONDS.convert((System.nanoTime() - startTime), TimeUnit.NANOSECONDS);
+        System.out.println("Total elapsed time: " + elapsedTimeInMillis + " ms");
     }
 
     private static JSONTree generateTrace(Path path) {
