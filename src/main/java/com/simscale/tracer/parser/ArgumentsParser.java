@@ -1,7 +1,6 @@
 package com.simscale.tracer.parser;
 
 import java.io.*;
-import java.util.function.Supplier;
 
 public final class ArgumentsParser {
 
@@ -9,29 +8,37 @@ public final class ArgumentsParser {
     private final OutputStream output;
 
     private ArgumentsParser(InputStream input, OutputStream output) {
+        if (input == null || output == null) help("input or output cannot be null");
         this.input = input;
         this.output = output;
     }
 
     public static ArgumentsParser parse(String[] args) throws FileNotFoundException, IllegalArgumentException {
-        InputStream input = System.in;
-        OutputStream output = System.out;
+        InputStream input = null;
+        OutputStream output = null;
 
-        if (args.length == 4) {
-            if ("-i".equals(args[0]) || "--input".equals(args[0]))
-                input = new FileInputStream(args[1]);
-            else
-                help(IllegalArgumentException::new);
+        for (int i = 0; i < args.length; i++) {
+            if ("-i".equals(args[i]) || "--input".equals(args[i]))
+                try {
+                    input = new FileInputStream(args[i + 1]);
+                } catch (ArrayIndexOutOfBoundsException ex) {
+                    help("incorrect file input");
+                }
 
-            if ("-o".equals(args[2]) || "--output".equals(args[2]))
-                output = new FileOutputStream(args[3]);
-            else if ("--stdout".equals(args[2]))
+            else if ("--stdin".equals(args[i]))
+                input = System.in;
+
+            if ("-o".equals(args[i]) || "--output".equals(args[i]))
+                try {
+                    output = new FileOutputStream(args[i + 1], true);
+                } catch (ArrayIndexOutOfBoundsException ex) {
+                    help("incorrect file output");
+                }
+
+            else if ("--stdout".equals(args[i]))
                 output = System.out;
-            else
-                help(IllegalArgumentException::new);
-        } else {
-            help(IllegalArgumentException::new);
         }
+
         return new ArgumentsParser(input, output);
     }
 
@@ -43,9 +50,10 @@ public final class ArgumentsParser {
         return output;
     }
 
-    public static void help(Supplier<? extends RuntimeException> exception) {
+    public static void help(String text) {
+        System.err.println(String.format("ERROR: %s", text));
         System.out.println(HELP_TEXT);
-        throw exception.get();
+        System.exit(1);
     }
 
     private static final String HELP_TEXT =
