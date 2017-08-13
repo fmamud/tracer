@@ -1,18 +1,9 @@
 package com.simscale.tracer.ast;
 
 public class LogLine {
-    public final static LogLine NULL_CALLER_SPAN = new LogLine("null");
-
-    public final static LogLine EOF = new LogLine("EOF");
-
     public String start, end, trace, serviceName, callerSpan, span;
 
-    private LogLine(String spans) {
-        this.span = spans;
-        this.callerSpan = spans;
-    }
-
-    public LogLine(String[] line) {
+    public LogLine(String[] line) throws ArrayIndexOutOfBoundsException {
         start = line[0];
         end = line[1];
         trace = line[2];
@@ -20,18 +11,6 @@ public class LogLine {
         String[] spanNode = line[4].split("->");
         callerSpan = spanNode[0];
         span = spanNode[1];
-    }
-
-    @Override
-    public String toString() {
-        return "LogLine{" +
-                "start='" + start + '\'' +
-                ", end='" + end + '\'' +
-                ", trace='" + trace + '\'' +
-                ", serviceName='" + serviceName + '\'' +
-                ", callerSpan='" + callerSpan + '\'' +
-                ", span='" + span + '\'' +
-                '}';
     }
 
     public String getCallerSpan() {

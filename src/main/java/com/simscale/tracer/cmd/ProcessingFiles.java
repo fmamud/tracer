@@ -13,8 +13,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 
 public class ProcessingFiles implements Step {
@@ -31,6 +33,7 @@ public class ProcessingFiles implements Step {
         try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(output), BUFFER_SIZE)) {
             Files.list(Paths.get(System.getProperty("tracer.tmp.dir", "/tmp/sim")))
                     .map(this::generateTrace)
+                    .filter(tree -> tree.root != null)
                     .forEach(tree -> {
                         try {
                             bw.write(tree.toString());
@@ -46,20 +49,21 @@ public class ProcessingFiles implements Step {
 
     private JSONTree generateTrace(Path path) {
         JSONTree tree = new JSONTree();
+        tree.id = path.getFileName().toString();
         try {
-            tree.id = path.getFileName().toString();
-
             Map<String, List<LogLine>> pathMap = Files.readAllLines(path)
                     .stream()
                     .parallel()
                     .map(line -> new LogLine(line.split("\\s+")))
                     .collect(Collectors.groupingBy(LogLine::getCallerSpan));
 
-            LogLine ll = pathMap.get("null").get(0);
+            LogLine ll = ofNullable(pathMap.get("null")).map(list -> list.get(0)).orElseThrow(IllegalStateException::new);
 
             Node root = new Node(ll.start, ll.end, ll.serviceName, ll.span);
             tree.root = root;
             walk(pathMap, root);
+        } catch (IllegalStateException ex) {
+            System.err.printf("ERROR: trace does not have root -> %s\n", tree.id);
         } catch (IOException e) {
             e.printStackTrace();
         }
