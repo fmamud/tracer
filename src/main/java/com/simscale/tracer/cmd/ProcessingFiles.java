@@ -69,10 +69,10 @@ public class ProcessingFiles implements Step {
         return tree;
     }
 
-    private List<Node> walk(Map<String, List<LogLine>> pathMap, Node Node) {
-        List<LogLine> logLines = pathMap.get(Node.getSpan());
+    private List<Node> walk(Map<String, List<LogLine>> pathMap, Node node) {
+        List<LogLine> logLines = pathMap.get(node.getSpan());
         if (logLines != null) {
-            Node.calls = logLines.stream()
+            node.calls = logLines.stream()
                     .parallel()
                     .map(ll -> {
                         Node n = new Node(ll.getStart(), ll.getEnd(), ll.getServiceName(), ll.getSpan());
@@ -80,6 +80,6 @@ public class ProcessingFiles implements Step {
                         return n;
                     }).collect(toList());
         }
-        return Node.calls;
+        return node.calls;
     }
 }
