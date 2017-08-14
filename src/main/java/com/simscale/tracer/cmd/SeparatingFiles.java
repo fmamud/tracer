@@ -1,6 +1,6 @@
 package com.simscale.tracer.cmd;
 
-import com.simscale.tracer.ast.LogLine;
+import com.simscale.tracer.model.LogLine;
 
 import java.io.*;
 
@@ -20,7 +20,7 @@ public class SeparatingFiles implements Step {
             while ((line = br.readLine()) != null) {
                 try {
                     LogLine logLine = new LogLine(line.split("\\s+"));
-                    File file = new File(System.getProperty("tracer.tmp.dir", "/tmp/sim"), logLine.trace);
+                    File file = new File(System.getProperty("tracer.tmp.dir", "/tmp/sim"), logLine.getTrace());
                     file.deleteOnExit();
                     try (BufferedWriter bw = new BufferedWriter(new FileWriter(file, true), BUFFER_SIZE)) {
                         bw.write(line);
