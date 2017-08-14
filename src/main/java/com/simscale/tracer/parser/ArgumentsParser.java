@@ -7,22 +7,34 @@ public final class ArgumentsParser {
     private final InputStream input;
     private final OutputStream output;
 
-    private ArgumentsParser(InputStream input, OutputStream output) {
-        if (input == null || output == null) help("input or output not found");
+    private final boolean exitOnHelp;
+
+    private ArgumentsParser(InputStream input, OutputStream output, boolean exitOnHelp) throws IllegalArgumentException {
+        if (input == null || output == null) {
+            printHelp();
+            throw new IllegalArgumentException("input or output not found");
+        }
         this.input = input;
         this.output = output;
+        this.exitOnHelp = exitOnHelp;
     }
 
     public static ArgumentsParser parse(String[] args) throws FileNotFoundException, IllegalArgumentException {
+        return parse(args, true);
+    }
+
+    public static ArgumentsParser parse(String[] args, boolean exitOnHelp) throws FileNotFoundException, IllegalArgumentException {
         InputStream input = null;
         OutputStream output = null;
+
+        if (args == null || args.length > 4) throw new IllegalArgumentException("args size must be less than or equal to 4");
 
         for (int i = 0; i < args.length; i++) {
             if ("-i".equals(args[i]) || "--input".equals(args[i]))
                 try {
                     input = new FileInputStream(args[i + 1]);
                 } catch (ArrayIndexOutOfBoundsException ex) {
-                    help("incorrect file input");
+                    printHelp();
                 }
 
             else if ("--stdin".equals(args[i]))
@@ -32,14 +44,14 @@ public final class ArgumentsParser {
                 try {
                     output = new FileOutputStream(args[i + 1], true);
                 } catch (ArrayIndexOutOfBoundsException ex) {
-                    help("incorrect file output");
+                    printHelp();
                 }
 
             else if ("--stdout".equals(args[i]))
                 output = System.out;
         }
 
-        return new ArgumentsParser(input, output);
+        return new ArgumentsParser(input, output, exitOnHelp);
     }
 
     public InputStream getInput() {
@@ -50,10 +62,14 @@ public final class ArgumentsParser {
         return output;
     }
 
-    public static void help(String text) {
+    public void help(String text) {
         System.err.println(String.format("ERROR: %s\n", text));
+        printHelp();
+        if (exitOnHelp) System.exit(1);
+    }
+
+    public static void printHelp() {
         System.out.println(HELP_TEXT);
-        System.exit(1);
     }
 
     private static final String HELP_TEXT =
