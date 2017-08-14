@@ -1,5 +1,6 @@
-package com.simscale.tracer.cmd;
+package com.simscale.tracer.cmd.processing;
 
+import com.simscale.tracer.cmd.Step;
 import com.simscale.tracer.model.LogLine;
 import com.simscale.tracer.model.ast.Node;
 import com.simscale.tracer.model.ast.NodeTree;
@@ -8,56 +9,51 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import static com.simscale.tracer.model.TraceDirectory.TRACE_PATH;
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 
-public class ProcessingFiles implements Step {
-    private OutputStream output;
+public interface Processable<T> extends Step {
+    int BUFFER_SIZE = 1024 * 128;
 
-    private static final int BUFFER_SIZE = 1024 * 128;
+    OutputStream stream();
 
-    private static final Logger LOGGER = Logger.getLogger(ProcessingFiles.class.getName());
+    Stream<T> data();
 
-    public ProcessingFiles(OutputStream output) {
-        this.output = output;
-    }
+    Function<T, String> id();
+
+    Function<T, Stream<String>> lines();
 
     @Override
-    public void execute() {
-        try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(output), BUFFER_SIZE)) {
-            Files.list(TRACE_PATH)
-                    .map(this::generateTrace)
+    default void execute() {
+        try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(stream()), BUFFER_SIZE)) {
+            data().map(this::generateTrace)
                     .filter(tree -> tree.getRoot() != null)
                     .forEach(tree -> this.write(bw, tree));
         } catch (IOException e) {
-            LOGGER.severe(e.getMessage());
+            log().severe(e.getMessage());
         }
     }
 
-    private void write(BufferedWriter bw, NodeTree tree) {
+    default void write(BufferedWriter bw, NodeTree tree) {
         try {
             bw.write(tree.toString());
             bw.write('\n');
         } catch (IOException e) {
-            LOGGER.severe(e.getMessage());
+            log().severe(e.getMessage());
         }
     }
 
-    private NodeTree generateTrace(Path path) {
-        NodeTree tree = new NodeTree(path.getFileName().toString());
+    default NodeTree generateTrace(T obj) {
+        NodeTree tree = new NodeTree(id().apply(obj));
         try {
-            Map<String, List<LogLine>> pathMap = Files.readAllLines(path)
-                    .stream()
-                    .parallel()
+            Map<String, List<LogLine>> pathMap = lines().apply(obj)
                     .map(line -> new LogLine(line.split("\\s+")))
                     .collect(Collectors.groupingBy(LogLine::getCallerSpan));
 
@@ -67,15 +63,13 @@ public class ProcessingFiles implements Step {
             tree.setRoot(root);
             walk(pathMap, root);
         } catch (IllegalStateException ex) {
-            LOGGER.warning(format("trace does not have root -> %s\n", tree.getId()));
-        } catch (IOException e) {
-            LOGGER.severe(e.getMessage());
+            log().warning(format("trace does not have root -> %s\n", tree.getId()));
         }
 
         return tree;
     }
 
-    private List<Node> walk(Map<String, List<LogLine>> pathMap, Node node) {
+    default List<Node> walk(Map<String, List<LogLine>> pathMap, Node node) {
         List<LogLine> logLines = pathMap.get(node.getSpan());
         if (logLines != null) {
             node.calls = logLines.stream()
