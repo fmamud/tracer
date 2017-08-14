@@ -1,8 +1,8 @@
 package com.simscale.tracer.cmd;
 
-import com.simscale.tracer.model.ast.NodeTree;
 import com.simscale.tracer.model.LogLine;
 import com.simscale.tracer.model.ast.Node;
+import com.simscale.tracer.model.ast.NodeTree;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -13,8 +13,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 
@@ -22,6 +24,8 @@ public class ProcessingFiles implements Step {
     private static final int BUFFER_SIZE = 1024 * 32;
 
     private OutputStream output;
+
+    private final static Logger LOGGER = Logger.getLogger(ProcessingFiles.class.getName());
 
     public ProcessingFiles(OutputStream output) {
         this.output = output;
@@ -33,16 +37,18 @@ public class ProcessingFiles implements Step {
             Files.list(Paths.get(System.getProperty("tracer.tmp.dir", "/tmp/sim")))
                     .map(this::generateTrace)
                     .filter(tree -> tree.getRoot() != null)
-                    .forEach(tree -> {
-                        try {
-                            bw.write(tree.toString());
-                            bw.write('\n');
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    });
+                    .forEach(tree -> this.write(bw, tree));
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.severe(e.getMessage());
+        }
+    }
+
+    private void write(BufferedWriter bw, NodeTree tree) {
+        try {
+            bw.write(tree.toString());
+            bw.write('\n');
+        } catch (IOException e) {
+            LOGGER.severe(e.getMessage());
         }
     }
 
@@ -61,9 +67,9 @@ public class ProcessingFiles implements Step {
             tree.setRoot(root);
             walk(pathMap, root);
         } catch (IllegalStateException ex) {
-            System.err.printf("ERROR: trace does not have root -> %s\n", tree.getId());
+            LOGGER.warning(format("trace does not have root -> %s\n", tree.getId()));
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.severe(e.getMessage());
         }
 
         return tree;

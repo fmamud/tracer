@@ -3,9 +3,14 @@ package com.simscale.tracer.cmd;
 import com.simscale.tracer.model.LogLine;
 
 import java.io.*;
+import java.util.logging.Logger;
+
+import static java.lang.String.format;
 
 public class SeparatingFiles implements Step {
     private static final int BUFFER_SIZE = 1024 * 32;
+
+    private final static Logger LOGGER = Logger.getLogger(SeparatingFiles.class.getName());
 
     private InputStream input;
 
@@ -26,14 +31,14 @@ public class SeparatingFiles implements Step {
                         bw.write(line);
                         bw.write('\n');
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        LOGGER.severe(e.getMessage());
                     }
                 } catch (ArrayIndexOutOfBoundsException ex) {
-                    System.err.printf("ERROR: trace parser error -> %s\n", line);
+                    LOGGER.warning(format("trace parser error -> %s", line));
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.severe(e.getMessage());
         }
     }
 }
