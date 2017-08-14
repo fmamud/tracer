@@ -14,3 +14,10 @@ jar {
         attributes 'Main-Class': 'com.simscale.tracer.Main'
     }
 }
+
+task run(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'com.simscale.tracer.Main'
+    if (project.hasProperty('trace.args'))
+        args project.getProperty('trace.args').split()
+}
