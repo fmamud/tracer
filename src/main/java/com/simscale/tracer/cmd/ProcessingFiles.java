@@ -21,7 +21,7 @@ import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 
 public class ProcessingFiles implements Step {
-    private static final int BUFFER_SIZE = 1024 * 32;
+    private static final int BUFFER_SIZE = 1024 * 128;
 
     private OutputStream output;
 

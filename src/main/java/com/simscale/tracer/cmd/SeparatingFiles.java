@@ -8,8 +8,6 @@ import java.util.logging.Logger;
 import static java.lang.String.format;
 
 public class SeparatingFiles implements Step {
-    private static final int BUFFER_SIZE = 1024 * 32;
-
     private final static Logger LOGGER = Logger.getLogger(SeparatingFiles.class.getName());
 
     private InputStream input;
@@ -27,7 +25,7 @@ public class SeparatingFiles implements Step {
                     LogLine logLine = new LogLine(line.split("\\s+"));
                     File file = new File(System.getProperty("tracer.tmp.dir", "/tmp/sim"), logLine.getTrace());
                     file.deleteOnExit();
-                    try (BufferedWriter bw = new BufferedWriter(new FileWriter(file, true), BUFFER_SIZE)) {
+                    try (BufferedWriter bw = new BufferedWriter(new FileWriter(file, true))) {
                         bw.write(line);
                         bw.write('\n');
                     } catch (IOException e) {
