@@ -8,7 +8,7 @@ public final class ArgumentsParser {
     private final OutputStream output;
 
     private ArgumentsParser(InputStream input, OutputStream output) {
-        if (input == null || output == null) help("input or output cannot be null");
+        if (input == null || output == null) help("input or output not found");
         this.input = input;
         this.output = output;
     }
@@ -51,7 +51,7 @@ public final class ArgumentsParser {
     }
 
     public static void help(String text) {
-        System.err.println(String.format("ERROR: %s", text));
+        System.err.println(String.format("ERROR: %s\n", text));
         System.out.println(HELP_TEXT);
         System.exit(1);
     }
