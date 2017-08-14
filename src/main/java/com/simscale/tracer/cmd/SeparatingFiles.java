@@ -1,14 +1,13 @@
 package com.simscale.tracer.cmd;
 
-import com.simscale.tracer.model.LogLine;
-
 import java.io.*;
 import java.util.logging.Logger;
 
+import static com.simscale.tracer.model.TraceDirectory.TRACE_DIR;
 import static java.lang.String.format;
 
 public class SeparatingFiles implements Step {
-    private final static Logger LOGGER = Logger.getLogger(SeparatingFiles.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(SeparatingFiles.class.getName());
 
     private InputStream input;
 
@@ -22,8 +21,7 @@ public class SeparatingFiles implements Step {
             String line;
             while ((line = br.readLine()) != null) {
                 try {
-                    LogLine logLine = new LogLine(line.split("\\s+"));
-                    File file = new File(System.getProperty("tracer.tmp.dir", "/tmp/sim"), logLine.getTrace());
+                    File file = new File(TRACE_DIR, line.split("\\s+")[2]);
                     file.deleteOnExit();
                     try (BufferedWriter bw = new BufferedWriter(new FileWriter(file, true))) {
                         bw.write(line);

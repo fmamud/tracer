@@ -10,22 +10,22 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import static com.simscale.tracer.model.TraceDirectory.TRACE_PATH;
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 
 public class ProcessingFiles implements Step {
-    private static final int BUFFER_SIZE = 1024 * 128;
-
     private OutputStream output;
 
-    private final static Logger LOGGER = Logger.getLogger(ProcessingFiles.class.getName());
+    private static final int BUFFER_SIZE = 1024 * 128;
+
+    private static final Logger LOGGER = Logger.getLogger(ProcessingFiles.class.getName());
 
     public ProcessingFiles(OutputStream output) {
         this.output = output;
@@ -34,7 +34,7 @@ public class ProcessingFiles implements Step {
     @Override
     public void execute() {
         try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(output), BUFFER_SIZE)) {
-            Files.list(Paths.get(System.getProperty("tracer.tmp.dir", "/tmp/sim")))
+            Files.list(TRACE_PATH)
                     .map(this::generateTrace)
                     .filter(tree -> tree.getRoot() != null)
                     .forEach(tree -> this.write(bw, tree));
