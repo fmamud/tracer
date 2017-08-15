@@ -16,6 +16,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.simscale.tracer.model.Engine.INMEMORY;
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
@@ -80,6 +81,10 @@ public interface Processable<T> extends Step {
                     }).collect(toList()));
         }
         return node.getCalls();
+    }
+
+    static Processable create(OutputStream stream) {
+        return create(INMEMORY, stream);
     }
 
     static Processable create(Engine engine, OutputStream stream) {

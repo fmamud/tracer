@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import static com.simscale.tracer.model.Engine.INMEMORY;
 import static java.lang.String.format;
 
 public interface Separable extends Step {
@@ -27,6 +28,10 @@ public interface Separable extends Step {
         } catch (ArrayIndexOutOfBoundsException ex) {
             log().warning(format("trace parser error -> %s", line));
         }
+    }
+
+    static Separable create(InputStream stream) {
+        return create(INMEMORY, stream);
     }
 
     static Separable create(Engine engine, InputStream stream) {

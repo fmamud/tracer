@@ -18,6 +18,10 @@ public final class Database {
     public static void put(String key, String line) {
         List<String> lines = ofNullable(get(key)).orElse(new ArrayList<>());
         lines.add(line);
+        put(key, lines);
+    }
+
+    public static void put(String key, List<String> lines) {
         DATA.put(key, lines);
     }
 
@@ -28,4 +32,6 @@ public final class Database {
     public static void clear() {
         DATA.clear();
     }
+
+    public static boolean isEmpty() { return DATA.isEmpty(); }
 }
