@@ -39,4 +39,8 @@ You can also run with a **executable jar**:
 ./gradlew build
 java -jar build/libs/tracer.jar <options>
 ```
+# How to test
 
+```sh
+./gradlew test
+```
