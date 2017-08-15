@@ -4,10 +4,10 @@ import com.simscale.tracer.model.Engine;
 
 import java.io.*;
 
+import static com.simscale.tracer.model.Engine.INMEMORY;
 import static java.lang.String.format;
 
 public final class ArgumentsParser {
-
     private static final int MAX_ARGS = 5;
 
     private final InputStream input;
@@ -18,7 +18,7 @@ public final class ArgumentsParser {
 
     private ArgumentsParser(InputStream input, OutputStream output, Engine engine, boolean exitOnHelp) throws IllegalArgumentException {
         if (input == null || output == null) {
-            throw new IllegalArgumentException("input and output cannot be null");
+            throw new IllegalArgumentException("input and output are required");
         }
         this.input = input;
         this.output = output;
@@ -33,34 +33,38 @@ public final class ArgumentsParser {
     public static ArgumentsParser parse(String[] args, boolean exitOnHelp) throws FileNotFoundException, IllegalArgumentException {
         InputStream input = null;
         OutputStream output = null;
-        Engine engine = null;
+        Engine engine = INMEMORY;
 
         try {
             if (args == null || args.length > MAX_ARGS)
                 throw new IllegalArgumentException(format("args size must be less than or equal to %d", MAX_ARGS));
 
             for (int i = 0; i < args.length; i++) {
-                if ("-i".equals(args[i]) || "--input".equals(args[i]))
+                if ("-i".equals(args[i]))
                     input = new FileInputStream(args[i + 1]);
-
+                else if (args[i].startsWith("--input"))
+                    input = new FileInputStream(args[i].split("=")[1]);
                 else if ("--stdin".equals(args[i]))
                     input = System.in;
 
-                if ("-o".equals(args[i]) || "--output".equals(args[i]))
+                if ("-o".equals(args[i]))
                     output = new FileOutputStream(args[i + 1], true);
-
+                else if (args[i].startsWith("--output"))
+                    output = new FileOutputStream(args[i].split("=")[1], true);
                 else if ("--stdout".equals(args[i]))
                     output = System.out;
 
-                if ("--engine".equals(args[i]))
+                if ("-e".equals(args[i]))
                     engine = Engine.of(args[i + 1]);
+                else if (args[i].startsWith("--engine"))
+                    engine = Engine.of(args[i].split("=")[1]);
 
                 if ("-h".equals(args[i]) || "-help".equals(args[i]) || "--help".equals(args[i]))
                     help(exitOnHelp);
             }
 
         } catch (ArrayIndexOutOfBoundsException ex) {
-            help(ex.getMessage(), exitOnHelp);
+            help(exitOnHelp);
         }
         return new ArgumentsParser(input, output, engine, exitOnHelp);
     }
@@ -92,12 +96,9 @@ public final class ArgumentsParser {
     }
 
     private static final String HELP_TEXT =
-            "Usage: java -jar tracer.jar [options] [trace-log.txt]\n" +
+            "Usage: tracer [options]\n" +
                     "Options:\n" +
-                    "  -i, --input   <file>         log file input\n" +
-                    "  --stdin                      use standard input to log input\n" +
-                    "  -o, --output  <file>         trace file output\n" +
-                    "  --stdout                     use standard input to log input\n" +
-                    "\n" +
-                    "  --engine=<inmemory|file>     select engine to separating and processing traces (default: inmemory)";
+                    "  -i, --input=<file>, --stdin      log file input\n" +
+                    "  -o, --output=<file>, --stdout    trace file output\n" +
+                    "  -e, --engine=<inmemory|file>     select engine to separating and processing traces (default: inmemory)\n";
 }

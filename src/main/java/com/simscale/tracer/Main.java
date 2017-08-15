@@ -17,7 +17,7 @@ public class Main {
             Step.sequence(Separable.create(opts.engine(), opts.input()),
                     Processable.create(opts.engine(), opts.output()));
         } catch (Exception ex) {
-            LOGGER.warning(ex.getMessage());
+            LOGGER.severe(ex.getMessage());
             ArgumentsParser.help();
         }
     }

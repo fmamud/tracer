@@ -6,21 +6,17 @@ Log parser generator to JSON trees.
 [start-timestamp] [end-timestamp] [trace] [service-name] [caller-span]->[span]
 ```
 
- 
-
-
 # Usage
 
 ```
-tracer [options] [trace-log.txt]
+Usage: tracer [options]
 Options:
-
-  -i, --input   <file>      log file input
-  --stdin                   use standard input to log input
-  -o, --output  <file>      trace file output
-  --stdout                  use standard input to log input
-
+  -i, --input=<file>, --stdin      log file input
+  -o, --output=<file>, --stdout    trace file output
+  -e, --engine=<inmemory|file>     select engine to separating and processing traces (default: inmemory)
 ```
+
+> If log file input is a huge file or you don't have available RAM memory, you can use `--engine=file`.
 
 First you **must** build the project and **run** executable jar:
 

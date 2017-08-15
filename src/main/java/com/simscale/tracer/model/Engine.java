@@ -13,8 +13,7 @@ public enum Engine {
         try {
             return valueOf(engine.toUpperCase());
         } catch (IllegalArgumentException ex) {
-            LOGGER.warning(format("Engine '%s' does not exists", engine));
-            return INMEMORY;
+            throw new IllegalArgumentException(format("Engine '%s' does not exists", engine), ex);
         }
     }
 }
