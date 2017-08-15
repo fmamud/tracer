@@ -6,10 +6,10 @@ import java.util.logging.Logger;
 
 import static java.lang.String.format;
 
-public class TraceDirectory {
-    private static final Logger LOGGER = Logger.getLogger(TraceDirectory.class.getName());
+public class Directory {
+    private static final Logger LOGGER = Logger.getLogger(Directory.class.getName());
 
-    private static final String TRACE_DIR_PROPERTY = System.getProperty("trace.tmp.dir", "/tmp/sim");
+    private static final String TRACE_DIR_PROPERTY = System.getProperty("trace.tmp.dir", "/tmp/traces");
 
     public static final File TRACE_DIR = file();
 

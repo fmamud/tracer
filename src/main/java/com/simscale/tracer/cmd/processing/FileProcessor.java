@@ -8,7 +8,7 @@ import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
-import static com.simscale.tracer.model.TraceDirectory.TRACE_PATH;
+import static com.simscale.tracer.model.Directory.TRACE_PATH;
 import static java.util.stream.Stream.empty;
 
 public class FileProcessor implements Processable<Path> {

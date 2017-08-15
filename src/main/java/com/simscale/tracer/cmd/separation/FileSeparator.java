@@ -2,7 +2,7 @@ package com.simscale.tracer.cmd.separation;
 
 import java.io.*;
 
-import static com.simscale.tracer.model.TraceDirectory.TRACE_DIR;
+import static com.simscale.tracer.model.Directory.TRACE_DIR;
 
 public class FileSeparator implements Separable {
     private InputStream input;
