@@ -27,18 +27,22 @@ If log file input is a huge file or you don't have available RAM memory, you can
 
 # How to run
 
-To run with **Gradle**:
-
-```sh
-./gradlew run -Ptrace.args="<option>"
-```
-
-You can also run with a **executable jar**:
+To run as **executable jar**:
 
 ```sh
 ./gradlew build
 java -jar build/libs/tracer.jar <options>
 ```
+
+You can also run with **Gradle**:
+
+```sh
+./gradlew run -Ptrace.args="<option>"
+```
+
+> In Gradle execution, progress bar does not work beautiful, because Gradle does not respect `\r` character.
+
+
 # How to test
 
 ```sh
