@@ -1,6 +1,7 @@
 package com.simscale.tracer.parser;
 
 import com.simscale.tracer.model.Engine;
+import com.simscale.tracer.model.Statistics;
 
 import java.io.*;
 
@@ -13,10 +14,11 @@ public final class ArgumentsParser {
     private final InputStream input;
     private final OutputStream output;
     private final Engine engine;
+    private boolean statistics;
 
     private final boolean exitOnHelp;
 
-    private ArgumentsParser(InputStream input, OutputStream output, Engine engine, boolean exitOnHelp) throws IllegalArgumentException {
+    private ArgumentsParser(InputStream input, OutputStream output, Engine engine, boolean exitOnHelp, boolean statistics) throws IllegalArgumentException {
         if (input == null || output == null) {
             throw new IllegalArgumentException("input and output are required");
         }
@@ -24,6 +26,7 @@ public final class ArgumentsParser {
         this.output = output;
         this.engine = engine;
         this.exitOnHelp = exitOnHelp;
+        this.statistics = statistics;
     }
 
     public static ArgumentsParser parse(String[] args) throws FileNotFoundException, IllegalArgumentException {
@@ -34,17 +37,20 @@ public final class ArgumentsParser {
         InputStream input = null;
         OutputStream output = null;
         Engine engine = INMEMORY;
+        boolean statistics = false;
 
         try {
             if (args == null || args.length > MAX_ARGS)
                 throw new IllegalArgumentException(format("args size must be less than or equal to %d", MAX_ARGS));
 
             for (int i = 0; i < args.length; i++) {
-                if ("-i".equals(args[i]))
+                if ("-i".equals(args[i])) {
                     input = new FileInputStream(args[i + 1]);
-                else if (args[i].startsWith("--input"))
+                    Statistics.totalTraces(new File(args[i + 1]).length());
+                } else if (args[i].startsWith("--input")) {
                     input = new FileInputStream(args[i].split("=")[1]);
-                else if ("--stdin".equals(args[i]))
+                    Statistics.totalTraces(new File(args[i].split("=")[1]).length());
+                } else if ("--stdin".equals(args[i]))
                     input = System.in;
 
                 if ("-o".equals(args[i]))
@@ -61,12 +67,15 @@ public final class ArgumentsParser {
 
                 if ("-h".equals(args[i]) || "-help".equals(args[i]) || "--help".equals(args[i]))
                     help(exitOnHelp);
+
+                if ("-s".equals(args[i]) || "--statistics".equals(args[i]))
+                    statistics = true;
             }
 
         } catch (ArrayIndexOutOfBoundsException ex) {
             help(exitOnHelp);
         }
-        return new ArgumentsParser(input, output, engine, exitOnHelp);
+        return new ArgumentsParser(input, output, engine, exitOnHelp, statistics);
     }
 
     public InputStream input() {
@@ -79,6 +88,10 @@ public final class ArgumentsParser {
 
     public Engine engine() {
         return engine;
+    }
+
+    public boolean showStatistics() {
+        return statistics;
     }
 
     public static void help() {
@@ -100,5 +113,6 @@ public final class ArgumentsParser {
                     "Options:\n" +
                     "  -i, --input=<file>, --stdin      log file input\n" +
                     "  -o, --output=<file>, --stdout    trace file output\n" +
-                    "  -e, --engine=<inmemory|file>     select engine to separating and processing traces (default: inmemory)\n";
+                    "  -e, --engine=<inmemory|file>     select engine to separating and processing traces (default: inmemory)\n" +
+                    "  -s, --statistics                 show statistics (orphans, malformed, totals)";
 }

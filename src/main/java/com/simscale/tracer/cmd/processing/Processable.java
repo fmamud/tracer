@@ -3,6 +3,8 @@ package com.simscale.tracer.cmd.processing;
 import com.simscale.tracer.cmd.Step;
 import com.simscale.tracer.model.Engine;
 import com.simscale.tracer.model.LogLine;
+import com.simscale.tracer.model.Statistics;
+import com.simscale.tracer.model.Statistics.ProgressBar;
 import com.simscale.tracer.model.ast.Node;
 import com.simscale.tracer.model.ast.NodeTree;
 
@@ -43,10 +45,14 @@ public interface Processable<T> extends Step {
                             bw.write('\n');
                         } catch (IOException e) {
                             log().severe(e.getMessage());
+                        } finally {
+                            ProgressBar.hit(this);
                         }
                     });
         } catch (IOException e) {
             log().severe(e.getMessage());
+        } finally {
+            ProgressBar.reset(this);
         }
     }
 
@@ -64,6 +70,7 @@ public interface Processable<T> extends Step {
             walk(pathMap, root);
         } catch (IllegalStateException ex) {
             log().warning(format("trace does not have root -> %s\n", tree.getId()));
+            Statistics.orphan();
         }
 
         return tree;
