@@ -22,7 +22,7 @@ Options:
   -e, --engine=<inmemory|file>     select engine to separating and processing traces (default: inmemory)
 ```
 
-> If log file input is a huge file or you don't have available RAM memory, you can use `--engine=file`.
+If log file input is a huge file or you don't have available RAM memory, you can use `--engine=file`. To processing with this engine, the tracer uses a temporary dir to creating trace log files, you can override using Java property `trace.tmp.dir`. (default: `/tmp/traces`)
 
 # How to run
 
