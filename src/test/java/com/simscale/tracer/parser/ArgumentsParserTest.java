@@ -19,8 +19,8 @@ public class ArgumentsParserTest {
     public void testStandardArgs() throws FileNotFoundException {
         ArgumentsParser args = ArgumentsParser.parse(new String[]{"--stdin", "--stdout"}, false);
 
-        assertSame(System.in, args.getInput());
-        assertSame(System.out, args.getOutput());
+        assertSame(System.in, args.input());
+        assertSame(System.out, args.output());
     }
 
     @Test
@@ -30,8 +30,8 @@ public class ArgumentsParserTest {
 
         ArgumentsParser args = ArgumentsParser.parse(new String[]{"-i", inputPath.getAbsolutePath(), "-o", outputPath.getAbsolutePath()}, false);
 
-        assertThat(args.getInput(), instanceOf(FileInputStream.class));
-        assertThat(args.getOutput(), instanceOf(FileOutputStream.class));
+        assertThat(args.input(), instanceOf(FileInputStream.class));
+        assertThat(args.output(), instanceOf(FileOutputStream.class));
     }
 
     @Test
@@ -39,8 +39,8 @@ public class ArgumentsParserTest {
         File inputPath = File.createTempFile("trace", "input.txt");
         ArgumentsParser args = ArgumentsParser.parse(new String[]{"-i", inputPath.getAbsolutePath(), "--stdout"}, false);
 
-        assertThat(args.getInput(), instanceOf(FileInputStream.class));
-        assertSame(System.out, args.getOutput());
+        assertThat(args.input(), instanceOf(FileInputStream.class));
+        assertSame(System.out, args.output());
     }
 
     @Test(expected = FileNotFoundException.class)
@@ -51,11 +51,11 @@ public class ArgumentsParserTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testNullArgs() throws IOException {
-        ArgumentsParser.parse(null);
+        ArgumentsParser.parse(null, false);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testOverflowArgs() throws IOException {
-        ArgumentsParser.parse(new String[]{"--stdin", "--stdout", "--stdin", "--stdout", "--stdin", "--stdout", "--stdin", "--stdout"});
+        ArgumentsParser.parse(new String[]{"--stdin", "--stdout", "--stdin", "--stdout", "--stdin", "--stdout", "--stdin", "--stdout"}, false);
     }
 }

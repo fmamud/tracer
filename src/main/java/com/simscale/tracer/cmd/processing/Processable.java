@@ -1,6 +1,7 @@
 package com.simscale.tracer.cmd.processing;
 
 import com.simscale.tracer.cmd.Step;
+import com.simscale.tracer.model.Engine;
 import com.simscale.tracer.model.LogLine;
 import com.simscale.tracer.model.ast.Node;
 import com.simscale.tracer.model.ast.NodeTree;
@@ -81,5 +82,16 @@ public interface Processable<T> extends Step {
                     }).collect(toList());
         }
         return node.calls;
+    }
+
+    static Processable create(Engine engine, OutputStream stream) {
+        switch (engine) {
+            case INMEMORY:
+                return new InMemoryProcessor(stream);
+            case FILE:
+                return new FileProcessor(stream);
+            default:
+                throw new IllegalArgumentException(format("Engine '%s' does not Processable implementation", engine.name()));
+        }
     }
 }

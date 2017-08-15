@@ -1,6 +1,6 @@
 package com.simscale.tracer.cmd.processing;
 
-import com.simscale.tracer.Main;
+import com.simscale.tracer.model.Database;
 
 import java.io.OutputStream;
 import java.util.List;
@@ -28,7 +28,7 @@ public class InMemoryProcessor implements Processable<Map.Entry<String, List<Str
 
     @Override
     public Stream<Map.Entry<String, List<String>>> data() {
-        return Main.data.entrySet().stream();
+        return Database.stream();
     }
 
     @Override
@@ -38,7 +38,7 @@ public class InMemoryProcessor implements Processable<Map.Entry<String, List<Str
 
     @Override
     public Function<Map.Entry<String, List<String>>, Stream<String>> lines() {
-        return entry -> Optional.ofNullable(Main.data.get(entry.getKey())).map(List::stream).orElse(empty());
+        return entry -> Optional.ofNullable(Database.get(entry.getKey())).map(List::stream).orElse(empty());
     }
 
     @Override

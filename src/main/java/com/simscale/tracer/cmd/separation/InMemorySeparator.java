@@ -1,12 +1,8 @@
 package com.simscale.tracer.cmd.separation;
 
-import com.simscale.tracer.Main;
+import com.simscale.tracer.model.Database;
 
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-
-import static java.util.Optional.ofNullable;
 
 public class InMemorySeparator implements Separable {
 
@@ -18,10 +14,7 @@ public class InMemorySeparator implements Separable {
 
     @Override
     public void separate(String line) {
-        String key = line.split("\\s+")[2];
-        List<String> lines = ofNullable(Main.data.get(key)).orElse(new ArrayList<>());
-        lines.add(line);
-        Main.data.put(key, lines);
+        Database.put(line.split("\\s+")[2], line);
     }
 
     @Override
