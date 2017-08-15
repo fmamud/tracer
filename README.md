@@ -6,6 +6,12 @@ Log parser generator to JSON trees.
 [start-timestamp] [end-timestamp] [trace] [service-name] [caller-span]->[span]
 ```
 
+A trace execution has three distinct phases.
+
+* **Initialization**: parsing args and preparing [Separable](https://github.com/fmamud/tracer/blob/master/src/main/java/com/simscale/tracer/cmd/separation/Separable.java) and [Processable](https://github.com/fmamud/tracer/blob/master/src/main/java/com/simscale/tracer/cmd/processing/Processable.java) implementations.
+* **Separation**: reads log trace input and stores in data structure. (inmemory or file)
+* **Processing**: process traces and generates JSON trees in output. (file or stdout)
+
 # Usage
 
 ```
@@ -18,15 +24,18 @@ Options:
 
 > If log file input is a huge file or you don't have available RAM memory, you can use `--engine=file`.
 
-First you **must** build the project and **run** executable jar:
+# How to run
+
+To run with **Gradle**:
+
+```sh
+./gradlew run -Ptrace.args="<option>"
+```
+
+You can also run with a **executable jar**:
 
 ```sh
 ./gradlew build
 java -jar build/libs/tracer.jar <options>
 ```
 
-You can also to run with Gradle:
-
-```sh
-./gradlew run -Ptrace.args="<option>"
-```
