@@ -11,20 +11,21 @@ import java.io.InputStreamReader;
 import static java.lang.String.format;
 
 public interface Separable extends Step {
-
-    void separate(String line);
+    void separate(String line) throws IOException;
 
     InputStream stream();
 
     @Override
     default void execute() {
+        String line = null;
         try (BufferedReader br = new BufferedReader(new InputStreamReader(stream()))) {
-            String line;
             while ((line = br.readLine()) != null) {
                 separate(line);
             }
         } catch (IOException e) {
             log().severe(e.getMessage());
+        } catch (ArrayIndexOutOfBoundsException ex) {
+            log().warning(format("trace parser error -> %s", line));
         }
     }
 
