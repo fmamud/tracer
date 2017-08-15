@@ -7,7 +7,7 @@ import static java.util.Collections.emptyList;
 public final class Node {
     private final String start, end, service, span;
 
-    public List<Node> calls = emptyList();
+    private List<Node> calls = emptyList();
 
     public Node(String start, String end, String service, String span) {
         this.start = start;
@@ -18,6 +18,14 @@ public final class Node {
 
     public String getSpan() {
         return span;
+    }
+
+    public List<Node> getCalls() {
+        return calls;
+    }
+
+    public void setCalls(List<Node> calls) {
+        this.calls = calls;
     }
 
     @Override

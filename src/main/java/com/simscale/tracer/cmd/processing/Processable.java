@@ -34,24 +34,22 @@ public interface Processable<T> extends Step {
     @Override
     default void execute() {
         try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(stream()), BUFFER_SIZE)) {
-            data().map(this::generateTrace)
+            data().map(this::nodeTree)
                     .filter(tree -> tree.getRoot() != null)
-                    .forEach(tree -> this.write(bw, tree));
+                    .forEach(tree -> {
+                        try {
+                            bw.write(tree.toString());
+                            bw.write('\n');
+                        } catch (IOException e) {
+                            log().severe(e.getMessage());
+                        }
+                    });
         } catch (IOException e) {
             log().severe(e.getMessage());
         }
     }
 
-    default void write(BufferedWriter bw, NodeTree tree) {
-        try {
-            bw.write(tree.toString());
-            bw.write('\n');
-        } catch (IOException e) {
-            log().severe(e.getMessage());
-        }
-    }
-
-    default NodeTree generateTrace(T obj) {
+    default NodeTree nodeTree(T obj) {
         NodeTree tree = new NodeTree(id().apply(obj));
         try {
             Map<String, List<LogLine>> pathMap = lines().apply(obj)
@@ -73,15 +71,15 @@ public interface Processable<T> extends Step {
     default List<Node> walk(Map<String, List<LogLine>> pathMap, Node node) {
         List<LogLine> logLines = pathMap.get(node.getSpan());
         if (logLines != null) {
-            node.calls = logLines.stream()
+            node.setCalls(logLines.stream()
                     .parallel()
                     .map(ll -> {
                         Node n = new Node(ll.getStart(), ll.getEnd(), ll.getServiceName(), ll.getSpan());
-                        n.calls = walk(pathMap, n);
+                        n.setCalls(walk(pathMap, n));
                         return n;
-                    }).collect(toList());
+                    }).collect(toList()));
         }
-        return node.calls;
+        return node.getCalls();
     }
 
     static Processable create(Engine engine, OutputStream stream) {
