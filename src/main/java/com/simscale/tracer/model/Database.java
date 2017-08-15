@@ -24,4 +24,8 @@ public final class Database {
     public static Stream<Map.Entry<String, List<String>>> stream() {
         return DATA.entrySet().stream();
     }
+
+    public static void clear() {
+        DATA.clear();
+    }
 }
